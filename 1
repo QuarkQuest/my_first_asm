@@ -1,0 +1,86 @@
+section .text
+
+global _start
+
+_start:
+
+    mov     ecx, str1
+    mov     edx, 255
+    mov     ebx, 0
+    mov     eax, 3
+    int     0x80
+    
+    mov edx, str1
+    xor eax,eax
+go:
+    mov bl,[edx]
+    inc edx
+    inc esi
+    cmp bl,0x0
+    je exit
+    cmp bl,0x20
+    je go
+    cmp bl,'+'
+    je znak
+    
+    cmp bl,'-'
+    je znak
+    
+    cmp bl,'0'
+    jl go
+    cmp bl,'9'
+    jg go
+    
+    jmp del
+
+del:
+    dec edx
+    dec esi
+    mov eax,edx
+    mov [edx],byte 0x20
+    jmp sdv
+sdv:
+    mov bl,[eax+1]
+    mov [eax],bl
+    inc eax
+    cmp [eax],byte 0x0
+    je io
+    jmp sdv
+io:
+    xor eax,eax
+    jmp go
+    
+
+znak:
+    cmp [str1 + eax],byte 0x0
+    je main
+    inc eax
+    jmp znak
+
+main:
+    cmp eax,esi
+    jl po
+    mov cl,[str1 + eax-1]
+    mov [str1 + eax],cl
+    dec eax
+    jmp main
+po:
+    xor eax,eax
+    xor cl,cl
+    inc edx
+    inc esi
+    jmp go
+    
+exit:
+    mov     ecx, str1
+    mov     edx, 255
+    mov     ebx, 1
+    mov     eax, 4
+    int     0x80
+    
+    mov     eax, 1
+    int     0x80
+
+segment .bss
+
+    str1 resb 255
